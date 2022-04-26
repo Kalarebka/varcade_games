@@ -1,8 +1,9 @@
 from django.conf import settings
-from django.http import JsonResponse
 
 import requests
 import logging
+
+from requests.exceptions import RequestException
 
 
 def get_leaderboard(product_id):
