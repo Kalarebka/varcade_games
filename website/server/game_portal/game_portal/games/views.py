@@ -37,7 +37,7 @@ class GameStatsView(APIView):
     def get(self, request, product_id, format=None):
         data = get_player_stats_for_game(product_id, request.user.id)
         if data is None:
-            return Response({'error': 'Could not access the leaderboard server.'})
+            return Response({"error": "Could not access the leaderboard server."})
         return Response(data)
 
 
@@ -48,7 +48,7 @@ class LeaderboardView(APIView):
     def get(self, request, product_id, format=None):
         leaderboard_result = get_leaderboard(product_id)
         if leaderboard_result is None:
-            return Response({'error': 'Could not access the leaderboard server.'})
+            return Response({"error": "Could not access the leaderboard server."})
         # in_bulk will return a dict of UUID: Account.
         users = {
             str(k): v
