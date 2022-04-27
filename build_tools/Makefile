@@ -45,10 +45,10 @@ status:
 # Managing data
 
 snapshot_game_portal_db:
-	docker exec game_portal_db /usr/bin/mysqldump -u root --password=password game_portal > /tmp/game_portal_db.sql
+	docker exec gameportaldb /usr/bin/mysqldump -u root --password=password game_portal > /tmp/gameportaldb.sql
 
 import_game_portal_db:
-	docker exec -i game_portal_db mysql -u root --password=password game_portal < /tmp/game_portal_db.sql
+	docker exec -i gameportaldb mysql -u root --password=password game_portal < /tmp/gameportaldb.sql
 
 # Working with Kubernetes
 
