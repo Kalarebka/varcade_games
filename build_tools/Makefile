@@ -6,7 +6,7 @@ include .env
 
 # Variables
 
-.PHONY: list-apps build build_production start stop clean restart logs snapshot_game_portal_db import_game_portal_db \
+.PHONY: list-apps build build_production start stop clean restart shell logs snapshot_game_portal_db import_game_portal_db \
 	kube_build_env kube_generate kube_apply
 
 # Managing the stack
@@ -28,6 +28,9 @@ clean:
 
 restart: stop start
 
+shell:
+	docker exec -it $(a) bash
+
 # Querying the stack
 ls: list-apps
 
@@ -45,10 +48,10 @@ status:
 # Managing data
 
 snapshot_game_portal_db:
-	docker exec game_portal_db /usr/bin/mysqldump -u root --password=password game_portal > /tmp/game_portal_db.sql
+	docker exec gameportaldb /usr/bin/mysqldump -u root --password=password game_portal > /tmp/gameportaldb.sql
 
 import_game_portal_db:
-	docker exec -i game_portal_db mysql -u root --password=password game_portal < /tmp/game_portal_db.sql
+	docker exec -i gameportaldb mysql -u root --password=password game_portal < /tmp/gameportaldb.sql
 
 # Working with Kubernetes
 
