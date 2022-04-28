@@ -8,18 +8,17 @@
 
         <hr/>
         
-        <div class="info-box-bg" v-bind:class="{ 'info-box-empty': !statsLoaded || !statsRecorded }">
+        <div class="info-box-bg lb-container" v-bind:class="{ 'info-box-empty': !statsLoaded || !statsRecorded }">
             <div v-if="playerGameStats">
                 <div v-if="statsRecorded">
-                    <ul v-for="value in playerGameStats" :key="`${ value }`">
-                        <li>
-                            {{ value }}
-                        </li>
-                    </ul>
+                    <div class="row lb-row" v-for="(value) in playerGameStats" :key="`${ value }`">
+                        <div class="col">{{ value[0] }}</div>
+                        <div class="col">{{ value[1] }}</div>
+                    </div>
                 </div>
                 <div v-else class="info-box-layout">
                     <div>
-                        <h5>Looks like you haven't played this game online yet, what are you wating for?</h5>
+                        <h5>Looks like you haven't played this game online yet, what are you waiting for?</h5>
                         <p>As you play your stats will be updated here.</p>
                     </div>
                 </div>
@@ -91,9 +90,9 @@
                 if (statsFormat && statsData) {
                     statsFormat.stat_ordering.forEach(entry => {
                         if (statsData[entry]) {
-                            this.playerGameStats.push(`
-                                ${statsFormat.strings.en[entry]}: 
-                                ${statsData[entry]}`
+                            this.playerGameStats.push([`
+                                ${statsFormat.strings.en[entry]}`,
+                                `${statsData[entry]}`]
                             )
                         }
                     })
@@ -113,6 +112,17 @@
 
 <style>
 
- 
+    .lb-row {
+    font-weight: bold;
+    border-bottom: 1px solid #ff48484a;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    }
+
+    .lb-container {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
 
 </style>
