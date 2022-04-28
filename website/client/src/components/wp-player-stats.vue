@@ -8,10 +8,10 @@
 
         <hr/>
         
-        <div class="info-box-bg lb-container" v-bind:class="{ 'info-box-empty': !statsLoaded || !statsRecorded }">
+        <div class="info-box-bg ps-container" v-bind:class="{ 'info-box-empty': !statsLoaded || !statsRecorded }">
             <div v-if="playerGameStats">
                 <div v-if="statsRecorded">
-                    <div class="row lb-row" v-for="(value) in playerGameStats" :key="`${ value }`">
+                    <div class="row ps-row" v-for="(value) in playerGameStats" :key="`${ value }`">
                         <div class="col">{{ value[0] }}</div>
                         <div class="col">{{ value[1] }}</div>
                     </div>
@@ -112,14 +112,14 @@
 
 <style>
 
-    .lb-row {
+    .ps-row {
     font-weight: bold;
     border-bottom: 1px solid #ff48484a;
     padding-top: 1em;
     padding-bottom: 1em;
     }
 
-    .lb-container {
+    .ps-container {
         overflow-x: hidden;
         overflow-y: auto;
     }
