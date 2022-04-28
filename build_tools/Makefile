@@ -6,7 +6,7 @@ include .env
 
 # Variables
 
-.PHONY: list-apps build build_production start stop clean restart logs snapshot_game_portal_db import_game_portal_db \
+.PHONY: list-apps build build_production start stop clean restart shell logs snapshot_game_portal_db import_game_portal_db \
 	kube_build_env kube_generate kube_apply
 
 # Managing the stack
@@ -27,6 +27,9 @@ clean:
 	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) down --remove-orphans
 
 restart: stop start
+
+shell:
+	docker exec -it $(a) bash
 
 # Querying the stack
 ls: list-apps
