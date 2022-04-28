@@ -21,7 +21,7 @@ The `parent` entry in the Phaser config specifies the DOM element that the game 
 There are eight key scenes in `Rock Paper Scissors Apocalypse`:
 
 * **MainMenuScene** - The first thing the player sees, contains gameplay (single/multi player) options and game setting
-* **StoryIntroScene** - Displays the game lore for single player mode
+* **StoryIntroScene** - Displays the game lore for single player mode. Once skipped manually by the player, it won't show again.
 * **CharacterSelectScene** - Character selection
 * **CharacterIntroScene** - Displays character backstories for single player mode
 * **VSScene** - Pre-fight VS screen that reveals to players their opponent 
