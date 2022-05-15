@@ -59,3 +59,10 @@ class TestAccounts:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert Account.objects.count() == 1
         assert len(response.data["password"]) == 1
+
+    def test_delete_user_deletes_from_leaderboards(self):
+        """ Ensure the user is deleted and the function to delete from leaderboards is called """
+        pass
+
+    def test_delete_user_handles_stats_server_error(self):
+        pass

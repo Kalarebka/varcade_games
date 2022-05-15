@@ -147,3 +147,13 @@ def _get_leaderboard_set_id(product_id: str, sub_key: str) -> str:
     sub_key str:    An additional qualifier for the leaderboard key, eg. wins, losses etc...
     """
     return f"_lb:{sub_key}:{product_id}"
+
+
+def remove_user_from_leaderboards(user_id: str):
+    """Remove user records from all leaderboards. """
+    redis_db = get_stats_tracker_db()
+    leaderboards_ids = redis_db.keys("_lb:wins:*")
+    for leaderboard_id in leaderboards_ids:
+        logging.info(f"Removing user {user_id} from leaderboard {leaderboard_id}")
+        redis_db.zrem(leaderboard_id, user_id)
+    

@@ -113,3 +113,22 @@ class TestLeaderboardTransactionErrorWithMocks:
         mocked_tracker_db_function_call.return_value = redis_mock
 
         assert record_result("exrps", "userB", "userA") is True
+
+
+class TestDeletingUserFromLeaderboards:
+    def test_leaderboard_api_delete_user_endpoint(self):
+        """ Test if: calling the endpoint calls the remove user from leaderboard function"""
+        pass
+
+    def test_remove_user_from_leaderboards(self):
+        """ Test if: calling the function causes removal of the user from all leaderboards"""
+        pass
+
+    def test_remove_user_from_leaderboards_handles_db_error(self):
+        """ Test if: if db stops working, function handles the error"""
+        pass
+
+    def delete_user_endpoint_handles_errors(self):
+        """ Test if: not sure yet what errors can occur, but we'll get to it. """
+
+
