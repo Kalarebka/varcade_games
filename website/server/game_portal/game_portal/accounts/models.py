@@ -1,8 +1,6 @@
 import uuid
 
 from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 
 from django.contrib.auth.models import AbstractUser
 
@@ -24,13 +22,3 @@ class Account(AbstractUser):
     USERNAME_FIELD = "email"
 
     REQUIRED_FIELDS = ["username"]
-
-
-######################## Signals ########################
-
-
-@receiver(post_delete, sender=Account)
-def delete_from_leaderboards(sender, instance, **kwargs) -> None:
-    user_id = instance.id
-
-
