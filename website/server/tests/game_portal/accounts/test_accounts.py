@@ -3,7 +3,10 @@ from rest_framework.test import APITestCase
 
 from rest_framework import status
 
+from unittest.mock import patch
+
 from game_portal.accounts.models import Account, AccountType
+from game_portal.accounts.signals import delete_user_from_leaderboards
 
 
 class TestAccounts:
@@ -60,9 +63,25 @@ class TestAccounts:
         assert Account.objects.count() == 1
         assert len(response.data["password"]) == 1
 
-    def test_delete_user_deletes_from_leaderboards(self):
-        """ Ensure the user is deleted and the function to delete from leaderboards is called """
+class TestSignals:
+
+    def setup_method(self):
+        self.test_user = Account.objects.create_user(
+            "test_user", "test@test.com", "pa88w0rd"
+        )
+
+    @patch()
+    def test_deleting_account_triggers_delete_from_leaderboard_signal(self):
+        """ Ensure deleting the user triggers signal and calls it only once """
+        # Mock the signal function
+        # Do the delete with orm
+        # Assert the function was called and it happened only once
         pass
 
-    def test_delete_user_handles_stats_server_error(self):
+    def test_delete_user_from_leaderboards_handles_stats_server_error(self):
+        # Mock stats server response?
+        # Should I test delete this way or the receiver function?
+        pass
+
+    def test_delete_user_from_leaderboards_success(self):
         pass
