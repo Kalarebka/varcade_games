@@ -3,7 +3,8 @@ from rest_framework.test import APITestCase
 
 from rest_framework import status
 
-from unittest.mock import patch
+from requests.exceptions import RequestException
+from unittest import mock
 
 from game_portal.accounts.models import Account, AccountType
 from game_portal.accounts.signals import delete_user_from_leaderboards
@@ -63,25 +64,48 @@ class TestAccounts:
         assert Account.objects.count() == 1
         assert len(response.data["password"]) == 1
 
-class TestSignals:
 
+class MockResponse:
+    """ Mocking response of stats server to the delete_user_from_leaderboards function"""
+
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
+def mocked_requests_post_with_error(*args, **kwargs):
+    raise RequestException
+
+
+class TestSignals:
     def setup_method(self):
         self.test_user = Account.objects.create_user(
             "test_user", "test@test.com", "pa88w0rd"
         )
 
-    @patch()
-    def test_deleting_account_triggers_delete_from_leaderboard_signal(self):
+    @mock.patch("requests.post")
+    def test_deleting_account_triggers_delete_from_leaderboard_signal(self, mock_post):
         """ Ensure deleting the user triggers signal and calls it only once """
-        # Mock the signal function
-        # Do the delete with orm
-        # Assert the function was called and it happened only once
-        pass
+        self.test_user.delete()
+        mock_post.assert_called_once()
 
-    def test_delete_user_from_leaderboards_handles_stats_server_error(self):
-        # Mock stats server response?
-        # Should I test delete this way or the receiver function?
-        pass
+    @mock.patch("requests.post", side_effect=mocked_requests_post_with_error)
+    def test_delete_user_from_leaderboards_handles_stats_server_error(self, mock_post):
+        result = delete_user_from_leaderboards(Account, self.test_user)
+        """ The function returns None when there is no error"""
+        assert result is None
 
-    def test_delete_user_from_leaderboards_success(self):
-        pass
+    @mock.patch("requests.post")
+    def test_delete_user_from_leaderboards_success(self, mock_post):
+        mock_post.return_value = MockResponse('{"success": True}', 200)
+        result = delete_user_from_leaderboards(Account, self.test_user)
+        assert result is None
+
+    @mock.patch("requests.post")
+    def test_delete_user_from_leaderboards_failure(self, mock_post):
+        mock_post.return_value = MockResponse('{"error": "some error message"}', 500)
+        result = delete_user_from_leaderboards(Account, self.test_user)
+        assert result is None

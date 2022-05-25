@@ -10,6 +10,7 @@ from requests.exceptions import RequestException
 
 from .models import Account
 
+
 @receiver(post_delete, sender=Account)
 def delete_user_from_leaderboards(sender, instance, **kwargs) -> None:
     user_id = instance.id

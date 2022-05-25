@@ -4,7 +4,7 @@ import pytest
 
 from unittest.mock import patch, MagicMock
 
-from redis import WatchError
+from redis import WatchError, RedisError, Redis
 
 from core.db import initialise_db, get_stats_tracker_db
 
@@ -14,6 +14,7 @@ from leaderboards.leaderboards import (
     get_user_rank,
     get_leaderboard_handler,
     register_leaderboard_handler,
+    remove_user_from_leaderboards,
 )
 from leaderboards.handlers import LeaderboardHandler
 
@@ -115,20 +116,29 @@ class TestLeaderboardTransactionErrorWithMocks:
         assert record_result("exrps", "userB", "userA") is True
 
 
-class TestDeletingUserFromLeaderboards:
-    def test_leaderboard_api_delete_user_endpoint(self):
-        """ Test if: calling the endpoint calls the remove user from leaderboard function"""
-        pass
-
-    def test_remove_user_from_leaderboards(self):
-        """ Test if: calling the function causes removal of the user from all leaderboards"""
-        pass
-
-    def test_remove_user_from_leaderboards_handles_db_error(self):
+class TestRemoveUserFromLeaderboards:
+    @patch("leaderboards.leaderboards.get_stats_tracker_db")
+    def test_remove_user_from_leaderboards_handles_db_error(self, db_error_mock):
         """ Test if: if db stops working, function handles the error"""
-        pass
+        db_error_mock = MagicMock()
+        db_error_mock.execute = MagicMock(side_effect=RedisError)
+        result = remove_user_from_leaderboards("some_user_id")
+        assert result is None
 
-    def delete_user_endpoint_handles_errors(self):
-        """ Test if: not sure yet what errors can occur, but we'll get to it. """
+    @patch("leaderboards.leaderboards.remove_user_from_leaderboards")
+    def test_leaderboard_api_delete_user_endpoint(self, remove_user_mock, test_client):
+        remove_user_mock = MagicMock(return_value="some_user_id")
+        response = test_client.post(f"leaderboards/delete_user/some_user_id")
+        assert remove_user_mock.assert_called_with("some_user_id")
+        assert response.status_code == 200
+        assert json.loads(response.data) == {"success": True}
 
-
+    @patch("leaderboards.leaderboards.remove_user_from_leaderboards")
+    def test_leaderboard_api_delete_user_endpoint_with_delete_failure(
+        self, remove_user_mock, test_client
+    ):
+        remove_user_mock = MagicMock(return_value=None)
+        response = test_client.post(f"leaderboards/delete_user/some_user_id")
+        assert remove_user_mock.assert_called_with("some_user_id")
+        assert response.status_code == 200
+        assert json.loads(response.data) == {"success": False}

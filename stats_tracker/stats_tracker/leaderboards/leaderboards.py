@@ -2,7 +2,7 @@ import logging
 
 from typing import Optional
 
-from redis import WatchError
+from redis import WatchError, RedisError
 
 from core.db import get_stats_tracker_db
 from core.errors import InvalidProductIdError
@@ -151,9 +151,15 @@ def _get_leaderboard_set_id(product_id: str, sub_key: str) -> str:
 
 def remove_user_from_leaderboards(user_id: str):
     """Remove user records from all leaderboards. """
-    redis_db = get_stats_tracker_db()
-    leaderboards_ids = redis_db.keys("_lb:wins:*")
-    for leaderboard_id in leaderboards_ids:
-        logging.info(f"Removing user {user_id} from leaderboard {leaderboard_id}")
-        redis_db.zrem(leaderboard_id, user_id)
-    
+    try:
+        redis_db = get_stats_tracker_db()
+        leaderboards_ids = redis_db.keys("_lb:wins:*")
+        for leaderboard_id in leaderboards_ids:
+            logging.info(f"Removing user {user_id} from leaderboard {leaderboard_id}")
+            redis_db.zrem(leaderboard_id, user_id)
+        return user_id
+    except RedisError as err:
+        logging.ERROR(
+            f"A redis database error occured while removing user from leaderboards: {err}"
+        )
+        return None
