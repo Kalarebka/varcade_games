@@ -24,9 +24,16 @@ def delete_user(user_id: str):
     logging.info(f"Removing user {user_id} from all leaderboards.")
     result = remove_user_from_leaderboards(user_id)
     if result is None:
-        json_response = json.dumps({"success": False})
-        return make_response(json_response, 200)
+        json_response = json.dumps({"status": "error"})
+        logging.info(json_response)
+        return make_response(json_response, 500)
+    elif result == []:
+        json_response = json.dumps({"status": "user not found", "removed_entries": []})
+        logging.info(json_response)
+        return make_response(json_response, 404)
     else:
-
-        json_response = json.dumps({"success": True, "remove_entries": result})
+        json_response = json.dumps(
+            {"status": "succesfully removed", "removed_entries": result}
+        )
+        logging.info(json_response)
         return make_response(json_response, 200)

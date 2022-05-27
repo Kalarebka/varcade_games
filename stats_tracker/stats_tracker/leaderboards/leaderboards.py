@@ -154,18 +154,19 @@ def remove_user_from_leaderboards(user_id: str):
     Returns None in case of a database error and a list of leaderboards the user
     was removed from otherwise."""
     try:
-        redis_db_pipeline = get_stats_tracker_db().pipeline()
-        leaderboards_ids = redis_db_pipeline.keys("_lb:wins:*")
+        redis_db = get_stats_tracker_db()
+        leaderboards_ids = redis_db.keys("_lb:wins:*")
         removed_from_leaderboards = []
+        pipeline = redis_db.pipeline()
         for leaderboard_id in leaderboards_ids:
             # zrem returns an integer - number of entries deleted
-            removed = redis_db_pipeline.zrem(leaderboard_id, user_id)
+            removed = pipeline.zrem(leaderboard_id, user_id)
             if removed:
                 logging.info(
                     f"Removed user {user_id} from leaderboard {leaderboard_id}"
                 )
                 removed_from_leaderboards.append(leaderboard_id)
-        redis_db_pipeline.execute()
+        pipeline.execute()
         if len(removed_from_leaderboards) == 0:
             logging.info(f"User {user_id} was not found in any leaderboard")
             return []
