@@ -1,13 +1,15 @@
+import flask
 import json
 
 import pytest
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import call, MagicMock, patch
 
-from redis import WatchError
+from redis import WatchError, RedisError, Redis
 
 from core.db import initialise_db, get_stats_tracker_db
 
+from leaderboards.api import delete_user, remove_user_from_leaderboards, make_response
 from leaderboards.leaderboards import (
     record_result,
     get_top_players,
@@ -71,6 +73,15 @@ class TestLeaderboardsApi:
             {"score": 0.0, "user_id": "userB"},
         ]
 
+    def test_leaderboard_api_delete_user_endpoint(self, test_client):
+        """Testing with a non-existing user"""
+        response = test_client.post(f"leaderboards/delete_user/some_user_id")
+        assert response.status_code == 404
+        assert json.loads(response.data) == {
+            "status": "user not found",
+            "removed_entries": [],
+        }
+
 
 @patch("leaderboards.leaderboards.get_stats_tracker_db")
 class TestLeaderboardTransactionErrorWithMocks:
@@ -113,3 +124,93 @@ class TestLeaderboardTransactionErrorWithMocks:
         mocked_tracker_db_function_call.return_value = redis_mock
 
         assert record_result("exrps", "userB", "userA") is True
+
+
+class TestRemoveUserFromLeaderboards:
+    @patch("leaderboards.leaderboards.get_stats_tracker_db")
+    def test_remove_user_from_leaderboards_handles_db_error(
+        self, mocked_tracker_db_function_call
+    ):
+        """ Test if: if db stops working, function handles the error"""
+        redis_mock = MagicMock()
+        redis_mock.keys = MagicMock(side_effect=RedisError)
+
+        mocked_tracker_db_function_call.return_value = redis_mock
+        result = remove_user_from_leaderboards("some_user_id")
+        assert result is None
+
+    @patch("leaderboards.leaderboards.get_stats_tracker_db")
+    def test_remove_user_from_leaderboards_user_does_not_exist(
+        self, mocked_tracker_db_function_call
+    ):
+        pipeline_mock = MagicMock()
+        pipeline_mock.execute = MagicMock()
+
+        redis_mock = MagicMock()
+        redis_mock.pipeline = MagicMock(return_value=pipeline_mock)
+        redis_mock.keys = MagicMock(return_value=[])
+        mocked_tracker_db_function_call.return_value = redis_mock
+
+        result = remove_user_from_leaderboards("some_user_id")
+        assert result == []
+
+    @patch("leaderboards.leaderboards.get_stats_tracker_db")
+    def test_remove_user_from_leaderboards_succesfully_removed(
+        self, mocked_tracker_db_function_call
+    ):
+        pipeline_mock = MagicMock()
+
+        pipeline_mock.zrem = MagicMock(return_value=1)
+        pipeline_mock.execute = MagicMock()
+
+        redis_mock = MagicMock()
+        redis_mock.pipeline = MagicMock(return_value=pipeline_mock)
+        redis_mock.keys = MagicMock(
+            return_value=["leaderboard_id", "another_leaderboard_id"]
+        )
+        mocked_tracker_db_function_call.return_value = redis_mock
+
+        result = remove_user_from_leaderboards("some_user_id")
+        pipeline_mock.zrem.assert_has_calls(
+            [
+                call("leaderboard_id", "some_user_id"),
+                call("another_leaderboard_id", "some_user_id"),
+            ]
+        )
+        assert pipeline_mock.zrem.call_count == 2
+        assert result == ["leaderboard_id", "another_leaderboard_id"]
+
+
+class TestDeleteUserApiFunction:
+    @patch("leaderboards.api.make_response")
+    @patch("leaderboards.api.remove_user_from_leaderboards")
+    def test_delete_user_with_error(self, mocked_remove, mocked_make_response):
+        mocked_remove.return_value = None
+        response = delete_user("some_user_id")
+        mocked_remove.assert_called()
+        mocked_make_response.assert_called_with('{"status": "error"}', 500)
+
+    @patch("leaderboards.api.make_response")
+    @patch("leaderboards.api.remove_user_from_leaderboards")
+    def test_delete_user_not_existing_in_leaderboards(
+        self, mocked_remove, mocked_make_response
+    ):
+        mocked_remove.return_value = []
+        response = delete_user("some_user_id")
+        mocked_remove.assert_called_with("some_user_id")
+        mocked_make_response.assert_called_with(
+            '{"status": "user not found", "removed_entries": []}', 404
+        )
+
+    @patch("leaderboards.api.make_response")
+    @patch("leaderboards.api.remove_user_from_leaderboards")
+    def test_delete_user_existing_in_leaderboards(
+        self, mocked_remove, mocked_make_response
+    ):
+        mocked_remove.return_value = ["some_id", "other_id"]
+        response = delete_user("some_user_id")
+        mocked_remove.assert_called_with("some_user_id")
+        mocked_make_response.assert_called_with(
+            '{"status": "succesfully removed", "removed_entries": ["some_id", "other_id"]}',
+            200,
+        )

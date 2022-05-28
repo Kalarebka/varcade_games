@@ -1,5 +1,7 @@
 import pytest
 
+from requests.exceptions import RequestException
+
 from rest_framework.test import APIClient
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -25,3 +27,20 @@ def api_client():
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     pass
+
+
+# Mocking requests and api responses
+class MockResponse:
+    """ Mocking api responses"""
+
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
+def mocked_requests_post_with_error(*args, **kwargs):
+    """Simulating request errors"""
+    raise RequestException
