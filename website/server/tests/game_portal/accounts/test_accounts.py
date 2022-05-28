@@ -6,6 +6,7 @@ from rest_framework import status
 from requests.exceptions import RequestException
 from unittest import mock
 
+from conftest import mocked_requests_post_with_error, MockResponse
 from game_portal.accounts.models import Account, AccountType
 from game_portal.accounts.signals import delete_user_from_leaderboards
 
@@ -65,22 +66,7 @@ class TestAccounts:
         assert len(response.data["password"]) == 1
 
 
-class MockResponse:
-    """ Mocking response of stats server to the delete_user_from_leaderboards function"""
-
-    def __init__(self, json_data, status_code):
-        self.json_data = json_data
-        self.status_code = status_code
-
-    def json(self):
-        return self.json_data
-
-
-def mocked_requests_post_with_error(*args, **kwargs):
-    raise RequestException
-
-
-class TestSignals:
+class TestDeleteUserFromLeaderboardsSignal:
     def setup_method(self):
         self.test_user = Account.objects.create_user(
             "test_user", "test@test.com", "pa88w0rd"

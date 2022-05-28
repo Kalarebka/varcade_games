@@ -18,22 +18,21 @@ def get_leaderboard(product_id: str):
     return make_response(json.dumps(get_top_players(product_id)), 200)
 
 
-# Route to delete a user from all leaderboards
 @leaderboards_blueprint.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id: str):
+    """ Deletes a user from all leaderboards."""
     logging.info(f"Removing user {user_id} from all leaderboards.")
     result = remove_user_from_leaderboards(user_id)
+
     if result is None:
         json_response = json.dumps({"status": "error"})
-        logging.info(json_response)
         return make_response(json_response, 500)
-    elif result == []:
+
+    if not result:
         json_response = json.dumps({"status": "user not found", "removed_entries": []})
-        logging.info(json_response)
         return make_response(json_response, 404)
-    else:
-        json_response = json.dumps(
-            {"status": "succesfully removed", "removed_entries": result}
-        )
-        logging.info(json_response)
-        return make_response(json_response, 200)
+
+    json_response = json.dumps(
+        {"status": "succesfully removed", "removed_entries": result}
+    )
+    return make_response(json_response, 200)

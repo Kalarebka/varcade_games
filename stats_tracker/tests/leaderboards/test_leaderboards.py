@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import call, MagicMock, patch
 
 from redis import WatchError, RedisError, Redis
 
@@ -171,6 +171,13 @@ class TestRemoveUserFromLeaderboards:
         mocked_tracker_db_function_call.return_value = redis_mock
 
         result = remove_user_from_leaderboards("some_user_id")
+        pipeline_mock.zrem.assert_has_calls(
+            [
+                call("leaderboard_id", "some_user_id"),
+                call("another_leaderboard_id", "some_user_id"),
+            ]
+        )
+        assert pipeline_mock.zrem.call_count == 2
         assert result == ["leaderboard_id", "another_leaderboard_id"]
 
 
