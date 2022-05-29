@@ -133,7 +133,7 @@ class TestRemoveUserFromLeaderboards:
     ):
         """ Test if: if db stops working, function handles the error"""
         redis_mock = MagicMock()
-        redis_mock.keys = MagicMock(side_effect=RedisError)
+        redis_mock.smembers = MagicMock(side_effect=RedisError)
 
         mocked_tracker_db_function_call.return_value = redis_mock
         result = remove_user_from_leaderboards("some_user_id")
@@ -148,7 +148,7 @@ class TestRemoveUserFromLeaderboards:
 
         redis_mock = MagicMock()
         redis_mock.pipeline = MagicMock(return_value=pipeline_mock)
-        redis_mock.keys = MagicMock(return_value=[])
+        redis_mock.smembers = MagicMock(return_value=[])
         mocked_tracker_db_function_call.return_value = redis_mock
 
         result = remove_user_from_leaderboards("some_user_id")
@@ -165,7 +165,7 @@ class TestRemoveUserFromLeaderboards:
 
         redis_mock = MagicMock()
         redis_mock.pipeline = MagicMock(return_value=pipeline_mock)
-        redis_mock.keys = MagicMock(
+        redis_mock.smembers = MagicMock(
             return_value=["leaderboard_id", "another_leaderboard_id"]
         )
         mocked_tracker_db_function_call.return_value = redis_mock
