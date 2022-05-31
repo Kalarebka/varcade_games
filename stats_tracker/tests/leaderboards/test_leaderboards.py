@@ -16,6 +16,9 @@ from leaderboards.leaderboards import (
     get_user_rank,
     get_leaderboard_handler,
     register_leaderboard_handler,
+    add_to_users_leaderboard_set,
+    get_users_leaderboard_set,
+    delete_users_leaderboard_set,
 )
 from leaderboards.handlers import LeaderboardHandler
 
@@ -40,6 +43,28 @@ class TestLeaderboards:
         record_result("exrps", "winner", "loser")
         assert get_user_rank("exrps", "winner") == 1
         assert get_user_rank("exrps", "loser") == 0
+
+    def test_add_to_users_leaderboard_set(self, stats_tracker_db):
+        add_to_users_leaderboard_set("userA", "exrps")
+        add_to_users_leaderboard_set("userA", "another_game_id")
+
+    def test_get_users_leaderboard_set(self, stats_tracker_db):
+        add_to_users_leaderboard_set("userA", "exrps")
+        add_to_users_leaderboard_set("userA", "another_game_id")
+        add_to_users_leaderboard_set("userB", "exrps")
+        userA_leaderboards = get_users_leaderboard_set("userA")
+        userB_leaderboards = get_users_leaderboard_set("userB")
+        assert len(userA_leaderboards) == 2
+        assert len(userB_leaderboards) == 1
+
+    def test_get_users_leaderboard_set_no_such_user(self, stats_tracker_db):
+        userC_leaderboards = get_users_leaderboard_set("userC")
+        assert not userC_leaderboards
+
+    def test_delete_users_leaderboard_set(self, stats_tracker_db):
+        add_to_users_leaderboard_set("userA", "exrps")
+        delete_users_leaderboard_set("userA")
+        assert not get_users_leaderboard_set("userA")
 
 
 class TestLeaderboardDefaultHandler:
@@ -133,7 +158,7 @@ class TestRemoveUserFromLeaderboards:
     ):
         """ Test if: if db stops working, function handles the error"""
         redis_mock = MagicMock()
-        redis_mock.keys = MagicMock(side_effect=RedisError)
+        redis_mock.smembers = MagicMock(side_effect=RedisError)
 
         mocked_tracker_db_function_call.return_value = redis_mock
         result = remove_user_from_leaderboards("some_user_id")
@@ -148,7 +173,7 @@ class TestRemoveUserFromLeaderboards:
 
         redis_mock = MagicMock()
         redis_mock.pipeline = MagicMock(return_value=pipeline_mock)
-        redis_mock.keys = MagicMock(return_value=[])
+        redis_mock.smembers = MagicMock(return_value=[])
         mocked_tracker_db_function_call.return_value = redis_mock
 
         result = remove_user_from_leaderboards("some_user_id")
@@ -165,7 +190,7 @@ class TestRemoveUserFromLeaderboards:
 
         redis_mock = MagicMock()
         redis_mock.pipeline = MagicMock(return_value=pipeline_mock)
-        redis_mock.keys = MagicMock(
+        redis_mock.smembers = MagicMock(
             return_value=["leaderboard_id", "another_leaderboard_id"]
         )
         mocked_tracker_db_function_call.return_value = redis_mock
