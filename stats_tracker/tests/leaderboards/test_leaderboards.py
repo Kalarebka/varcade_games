@@ -16,6 +16,8 @@ from leaderboards.leaderboards import (
     get_user_rank,
     get_leaderboard_handler,
     register_leaderboard_handler,
+    add_to_users_leaderboard_set,
+    get_users_leaderboard_set,
 )
 from leaderboards.handlers import LeaderboardHandler
 
@@ -40,6 +42,23 @@ class TestLeaderboards:
         record_result("exrps", "winner", "loser")
         assert get_user_rank("exrps", "winner") == 1
         assert get_user_rank("exrps", "loser") == 0
+
+    def test_add_to_users_leaderboard_set(self, stats_tracker_db):
+        add_to_users_leaderboard_set("userA", "exrps")
+        add_to_users_leaderboard_set("userA", "another_game_id")
+
+    def test_get_users_leaderboard_set(self, stats_tracker_db):
+        add_to_users_leaderboard_set("userA", "exrps")
+        add_to_users_leaderboard_set("userA", "another_game_id")
+        add_to_users_leaderboard_set("userB", "exrps")
+        userA_leaderboards = get_users_leaderboard_set("userA")
+        userB_leaderboards = get_users_leaderboard_set("userB")
+        assert len(userA_leaderboards) == 2
+        assert len(userB_leaderboards) == 1
+
+    def test_get_users_leaderboard_set_no_such_user(self, stats_tracker_db):
+        userC_leaderboards = get_users_leaderboard_set("userC")
+        assert not userC_leaderboards
 
 
 class TestLeaderboardDefaultHandler:

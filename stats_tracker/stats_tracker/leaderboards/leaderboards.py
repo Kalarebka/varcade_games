@@ -172,20 +172,24 @@ def add_to_users_leaderboard_set(user_id: str, leaderboard_id: str):
         )
 
 
+def get_users_leaderboard_set(user_id: str):
+    # Get a list of all leaderboards user is in
+    users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
+    return get_stats_tracker_db().smembers(users_leaderboard_set_id)
+
+
 def remove_user_from_leaderboards(user_id: str):
     """Remove user records from all leaderboards he's in.
     Returns None in case of a database error and a list of leaderboards the user
     was removed from otherwise."""
     try:
-        redis_db = get_stats_tracker_db()
-        users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
-        leaderboards_ids = redis_db.smembers(users_leaderboard_set_id)
+        leaderboards_ids = get_users_leaderboard_set(user_id)
 
         if not leaderboards_ids:
             logging.info(f"User {user_id} was not found in any leaderboard")
             return []
 
-        pipeline = redis_db.pipeline()
+        pipeline = get_stats_tracker_db().pipeline()
         removed_from_leaderboards = []
         for leaderboard_id in leaderboards_ids:
             removed = pipeline.zrem(leaderboard_id, user_id)
@@ -198,8 +202,9 @@ def remove_user_from_leaderboards(user_id: str):
                 logging.info(
                     f"User {user_id} could not be removed from leaderboard {leaderboard_id}"
                 )
-        pipeline.srem(users_leaderboard_set_id, *removed_from_leaderboards)
         pipeline.execute()
+
+        # Should probably delete the user's leaderboard list now
 
         return removed_from_leaderboards
     except RedisError as err:
