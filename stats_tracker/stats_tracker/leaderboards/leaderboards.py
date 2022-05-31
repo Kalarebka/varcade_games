@@ -1,5 +1,4 @@
 import logging
-from os import removedirs
 
 from typing import Optional
 
@@ -159,7 +158,7 @@ def _get_users_leaderboard_set_id(user_id: str) -> str:
     return f"_lb:{user_id}:leaderboard_set"
 
 
-def add_to_users_leaderboard_set(user_id: str, leaderboard_id: str):
+def add_to_users_leaderboard_set(user_id: str, leaderboard_id: str) -> None:
     # Record the leaderboard id in user's lists of leaderboards
     try:
         db = get_stats_tracker_db()
@@ -167,18 +166,18 @@ def add_to_users_leaderboard_set(user_id: str, leaderboard_id: str):
         db.sadd(users_leaderboard_set_id, leaderboard_id)
         logging.info(f"Added leaderboard {leaderboard_id} to user {user_id} record")
     except RedisError as err:
-        logging.error(
+        logging.exception(
             f"An error occured while adding leaderboard {leaderboard_id} to user {user_id} record: {err}"
         )
 
 
-def get_users_leaderboard_set(user_id: str):
+def get_users_leaderboard_set(user_id: str) -> set:
     # Get a set of all leaderboards user is in
     users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
     return get_stats_tracker_db().smembers(users_leaderboard_set_id)
 
 
-def delete_users_leaderboard_set(user_id: str):
+def delete_users_leaderboard_set(user_id: str) -> int:
     # Delete the user's leaderboards set
     users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
     return get_stats_tracker_db().delete(users_leaderboard_set_id)
