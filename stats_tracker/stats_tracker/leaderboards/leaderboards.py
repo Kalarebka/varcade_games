@@ -173,9 +173,15 @@ def add_to_users_leaderboard_set(user_id: str, leaderboard_id: str):
 
 
 def get_users_leaderboard_set(user_id: str):
-    # Get a list of all leaderboards user is in
+    # Get a set of all leaderboards user is in
     users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
     return get_stats_tracker_db().smembers(users_leaderboard_set_id)
+
+
+def delete_users_leaderboard_set(user_id: str):
+    # Delete the user's leaderboards set
+    users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
+    return get_stats_tracker_db().delete(users_leaderboard_set_id)
 
 
 def remove_user_from_leaderboards(user_id: str):
@@ -204,7 +210,7 @@ def remove_user_from_leaderboards(user_id: str):
                 )
         pipeline.execute()
 
-        # Should probably delete the user's leaderboard list now
+        delete_users_leaderboard_set(user_id)
 
         return removed_from_leaderboards
     except RedisError as err:

@@ -18,6 +18,7 @@ from leaderboards.leaderboards import (
     register_leaderboard_handler,
     add_to_users_leaderboard_set,
     get_users_leaderboard_set,
+    delete_users_leaderboard_set,
 )
 from leaderboards.handlers import LeaderboardHandler
 
@@ -59,6 +60,11 @@ class TestLeaderboards:
     def test_get_users_leaderboard_set_no_such_user(self, stats_tracker_db):
         userC_leaderboards = get_users_leaderboard_set("userC")
         assert not userC_leaderboards
+
+    def test_delete_users_leaderboard_set(self, stats_tracker_db):
+        add_to_users_leaderboard_set("userA", "exrps")
+        delete_users_leaderboard_set("userA")
+        assert not get_users_leaderboard_set("userA")
 
 
 class TestLeaderboardDefaultHandler:
