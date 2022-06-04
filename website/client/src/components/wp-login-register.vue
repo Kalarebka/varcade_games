@@ -19,12 +19,13 @@
               <div class="form-group">
                 <label for="email" class="input-label">EMAIL</label>
                 <input  type="email" class="input form-control" id="email" v-model="lemail"
-                        aria-describedby="emailHelp">
+                        aria-describedby="emailHelp" v-on:keyup.enter=enterLogin ref="emailField">
               </div>
 
               <div class="form-group">
                 <label for="password" class="input-label">PASSWORD</label>
-                <input type="password" class="input form-control" id="password" v-model="lpassword">
+                <input type="password" class="input form-control" id="password" 
+                v-model="lpassword" v-on:keyup.enter=enterLogin>
                 <!-- <div>
                   <a href="#">Forgot your password?</a>
                 </div> -->
@@ -64,18 +65,20 @@
               <div class="form-group">
                 <label for="email" class="input-label">EMAIL</label>
                 <input  type="email" class="input form-control" id="email" v-model="remail"
-                        aria-describedby="emailHelp">
+                        aria-describedby="emailHelp" v-on:keyup.enter=enterRegister ref="emailField">
                  <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
               </div>
 
               <div class="form-group">
                 <label for="uname" class="input-label">USERNAME</label>
-                <input  type="text" class="input form-control" id="uname" v-model="rusername">
+                <input  type="text" class="input form-control" id="uname" v-model="rusername"
+                 v-on:keyup.enter=enterRegister>
               </div>
 
               <div class="form-group">
                 <label for="password" class="input-label">PASSWORD</label>
-                <input type="password" class="input form-control" id="password" v-model="rpassword">
+                <input type="password" class="input form-control" id="password" v-model="rpassword"
+                 v-on:keyup.enter=enterRegister>
               </div>
               <button type="button" 
                       :disabled=!registerEnabled 
@@ -105,6 +108,10 @@ import {login, register} from '../auth.js';
 export default {
   name: "wp-login-register",
   props: [],
+  mounted () {
+    // this.$refs.emailField.focus() 
+    this.$nextTick(() => this.$refs.emailField.focus());
+  },
   data () {
     return {
       loginSelected: true,
@@ -156,10 +163,12 @@ export default {
 
     selectRegister: function() {
       this.loginSelected = false;
+      this.$nextTick(() => this.$refs.emailField.focus());
     },
 
     selectLogin: function() {
       this.loginSelected = true;
+      this.$nextTick(() => this.$refs.emailField.focus());
     },
 
     checkLoginCredentials: function() {
@@ -221,6 +230,19 @@ export default {
         console.log('Got user info, login complete.');
         this.$router.push({ name: 'Games' })
       });
+    },
+
+    enterRegister: function() {
+      if (this.registerEnabled) {
+        this.register();
+      }
+
+    },
+
+    enterLogin: function() {
+      if (this.loginEnabled) {
+        this.login();
+      }
     }
 
   }
