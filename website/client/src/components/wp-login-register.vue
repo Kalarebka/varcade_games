@@ -109,7 +109,6 @@ export default {
   name: "wp-login-register",
   props: [],
   mounted () {
-    // this.$refs.emailField.focus() 
     this.$nextTick(() => this.$refs.emailField.focus());
   },
   data () {
