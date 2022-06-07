@@ -237,14 +237,13 @@
 
     .buttons {
         height: 100px;
-        /* margin-top: 2em; */
     }
 
     .error-info {
         color: #ff4848;
         justify-content: center;
-        height: 30px;
-        margin-top: -30px;
+        height: 1em;
+        margin-top: -1em;
     }
 
 </style>
