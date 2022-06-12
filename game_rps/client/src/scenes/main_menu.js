@@ -13,6 +13,8 @@ import { SinglePlayerGame } from '../game_engine_interface.js'
 
 import { getSceneLayoutData } from '../game_data/layout.js'
 
+import { getSaveGameData } from "../game_data/save_data"
+
 class MainMenuScene extends Phaser.Scene {
   constructor () {
     super({ key: 'MainMenuScene' })
@@ -21,12 +23,15 @@ class MainMenuScene extends Phaser.Scene {
 
   init (data) {
     this.error = data.error // This will be filled if returning from an error in another scene
+    this.gameSaveData = getSaveGameData()
   }
 
   create () {
     this.layoutData = getSceneLayoutData('MainMenuScene')
 
     audioManager.initialize(this.game)
+    audioManager.musicEnabled = this.gameSaveData.musicEnabled
+    audioManager.effectsEnabled = this.gameSaveData.soundEffectsEnabled
     audioManager.playMusic('bgMusic', true)
     const bgLayout = this.layoutData.ui.background
     this.add.image(

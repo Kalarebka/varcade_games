@@ -168,13 +168,15 @@ class SettingsModal extends Phaser.Scene {
     this.add.existing(new IconButton(this,
       settingsLayout.x, settingsLayout.y, 'global_texture',
       activeMusicIcon, inactiveMusicIcon, 0xFFFFFF, () => {
-        audioManager.toggleMusicEnabled()
+        audioManager.toggleMusicEnabled();
+        this.saveGameData.musicEnabled = !this.saveGameData.musicEnabled;
       }).setOrigin(settingsLayout.originX, settingsLayout.originY))
 
     this.add.existing(new IconButton(this,
       settingsLayout.x, settingsLayout.y + settingsLayout.padding, 'global_texture',
       activeEffectsIcon, inactiveEffectsIcon, 0xFFFFFF, () => {
-        audioManager.toggleEffectsEnabled()
+        audioManager.toggleEffectsEnabled();
+        this.saveGameData.soundEffectsEnabled = !this.saveGameData.soundEffectsEnabled;
       }).setOrigin(settingsLayout.originX, settingsLayout.originY))
 
     const closeButtonLayout = this.layoutData.ui.closeButton
@@ -187,6 +189,7 @@ class SettingsModal extends Phaser.Scene {
       closeButtonLayout.fontSize,
       closeButtonLayout.color,
       () => {
+        writeSaveGameData()
         this.parent.destroy()
         this.scene.remove()
       }

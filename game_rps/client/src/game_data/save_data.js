@@ -38,7 +38,9 @@ function loadSaveGameData () {
 
 function getDefaultSaveGameData () {
   const saveData = {
-    characterUnlocks: []
+    characterUnlocks: [],
+    musicEnabled: false,
+    soundEffectsEnabled: false
   }
 
   return saveData
