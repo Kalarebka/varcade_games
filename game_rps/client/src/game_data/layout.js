@@ -52,15 +52,12 @@ const sceneLayoutData = {
           fistIndicatorX: 260,
           fistIndicatorYOffset: -8
         },
-        settingsList: {
+        settingsButton: {
           icons: {
-            soundOffIcon: 'music_off',
-            soundOnIcon: 'music_on',
-            effectsOffIcon: 'sound_off',
-            effectsOnIcon: 'sound_on'
+            settingsIcon: 'cog'
           },
           x: globalLayoutData.screenWidth - 30,
-          y: globalLayoutData.halfScreenHeight + 230,
+          y: globalLayoutData.halfScreenHeight + 280,
           padding: 60,
           originX: 0.5,
           originY: 0.5
@@ -730,6 +727,54 @@ const modalLayoutData = {
       }
     }
 
+  },
+
+  Settings: {
+    
+    window: {
+      x: globalLayoutData.halfScreenWidth * 0.5,
+      y: globalLayoutData.halfScreenHeight * 0.5,
+      w: globalLayoutData.halfScreenWidth,
+      h: globalLayoutData.halfScreenHeight
+    },
+    ui: {
+      header: {
+        originX: 0.5,
+        originY: 0,
+        x: globalLayoutData.halfScreenWidth * 0.5,
+        y: 20,
+        color: 0xFFFFFF,
+        bitmapFontId: 'verdana64',
+        fontsize: 32
+      },
+      settingsList: {
+        icons: {
+          soundOffIcon: 'music_off',
+          soundOnIcon: 'music_on',
+          effectsOffIcon: 'sound_off',
+          effectsOnIcon: 'sound_on'
+        },
+        x: globalLayoutData.halfScreenWidth * 0.5,
+        y: 150,
+        padding: 60,
+        originX: 0.5,
+        originY: 0.5,
+        label: {
+          bitmapFontId: 'verdana64',
+          fontSize: 28,
+          fill: "#FFFFFF"
+        }
+      },
+      closeButton: {
+        originX: 0.5,
+        originY: 1.0,
+        x: globalLayoutData.halfScreenWidth * 0.5,
+        y: globalLayoutData.halfScreenHeight - 20,
+        color: 0xFF0000,
+        bitmapFontId: 'verdana64',
+        fontSize: 24
+      }
+    }
   }
 }
 

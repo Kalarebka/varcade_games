@@ -6,11 +6,14 @@ import { audioManager } from '../audio_manager.js'
 import { TextButton } from '../ui_elements/text_button'
 import { IconButton } from '../ui_elements/icon_button'
 import { showErrorModal } from '../ui_elements/modals'
+import { showSettingsModal } from '../ui_elements/modals'
 
 // Gameplay
 import { SinglePlayerGame } from '../game_engine_interface.js'
 
 import { getSceneLayoutData } from '../game_data/layout.js'
+
+import { getSaveGameData } from "../game_data/save_data"
 
 class MainMenuScene extends Phaser.Scene {
   constructor () {
@@ -20,12 +23,15 @@ class MainMenuScene extends Phaser.Scene {
 
   init (data) {
     this.error = data.error // This will be filled if returning from an error in another scene
+    this.gameSaveData = getSaveGameData()
   }
 
   create () {
     this.layoutData = getSceneLayoutData('MainMenuScene')
 
     audioManager.initialize(this.game)
+    audioManager.musicEnabled = this.gameSaveData.musicEnabled
+    audioManager.effectsEnabled = this.gameSaveData.soundEffectsEnabled
     audioManager.playMusic('bgMusic', true)
     const bgLayout = this.layoutData.ui.background
     this.add.image(
@@ -118,7 +124,18 @@ class MainMenuScene extends Phaser.Scene {
       console.log('No Matchmaker found - disabling multi player option.')
     }
 
-    this.addMenuOptions()
+    /**
+      Settings Button
+    **/
+
+    const settingsButtonLayout = this.layoutData.ui.settingsButton
+    const settingsButtonIcon = settingsButtonLayout.icons.settingsIcon
+    this.add.existing(new IconButton(this,
+      settingsButtonLayout.x, settingsButtonLayout.y, 'global_texture',
+      settingsButtonIcon, settingsButtonIcon, 0xFFFFFF, () => {
+      showSettingsModal(this)
+      }).setOrigin(settingsButtonLayout.originX, settingsButtonLayout.originY))
+
 
     if (this.error) {
       showErrorModal(
@@ -128,36 +145,6 @@ class MainMenuScene extends Phaser.Scene {
         'Close'
       )
     }
-  }
-
-  addMenuOptions () {
-    const settingsLayout = this.layoutData.ui.settingsList
-
-    const activeMusicIcon = audioManager.musicEnabled
-      ? settingsLayout.icons.soundOnIcon
-      : settingsLayout.icons.soundOffIcon
-    const inactiveMusicIcon = audioManager.musicEnabled
-      ? settingsLayout.icons.soundOffIcon
-      : settingsLayout.icons.soundOnIcon
-
-    const activeEffectsIcon = audioManager.effectsEnabled
-      ? settingsLayout.icons.effectsOnIcon
-      : settingsLayout.icons.effectsOffIcon
-    const inactiveEffectsIcon = audioManager.effectsEnabled
-      ? settingsLayout.icons.effectsOffIcon
-      : settingsLayout.icons.effectsOnIcon
-
-    this.add.existing(new IconButton(this,
-      settingsLayout.x, settingsLayout.y, 'global_texture',
-      activeMusicIcon, inactiveMusicIcon, 0xFFFFFF, () => {
-        audioManager.toggleMusicEnabled()
-      }).setOrigin(settingsLayout.originX, settingsLayout.originY))
-
-    this.add.existing(new IconButton(this,
-      settingsLayout.x, settingsLayout.y + settingsLayout.padding, 'global_texture',
-      activeEffectsIcon, inactiveEffectsIcon, 0xFFFFFF, () => {
-        audioManager.toggleEffectsEnabled()
-      }).setOrigin(settingsLayout.originX, settingsLayout.originY))
   }
 }
 
