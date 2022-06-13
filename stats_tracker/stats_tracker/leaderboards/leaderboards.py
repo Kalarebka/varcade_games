@@ -2,7 +2,7 @@ import logging
 
 from typing import Optional
 
-from redis import WatchError
+from redis import WatchError, RedisError
 
 from core.db import get_stats_tracker_db
 from core.errors import InvalidProductIdError
@@ -68,6 +68,10 @@ def record_result(product_id: str, winner_id: str, loser_id: str) -> bool:
 
     pipeline = get_stats_tracker_db().pipeline()
     leaderboard_id = _get_leaderboard_set_id(product_id, "wins")
+
+    # Record the leaderboard id in both user's lists of leaderboards
+    for user_id in (winner_id, loser_id):
+        add_to_users_leaderboard_set(user_id, leaderboard_id)
 
     for i in range(10):
         try:
@@ -147,3 +151,69 @@ def _get_leaderboard_set_id(product_id: str, sub_key: str) -> str:
     sub_key str:    An additional qualifier for the leaderboard key, eg. wins, losses etc...
     """
     return f"_lb:{sub_key}:{product_id}"
+
+
+def _get_users_leaderboard_set_id(user_id: str) -> str:
+    """Return a key for given user's list of leaderboards he's in."""
+    return f"_lb:{user_id}:leaderboard_set"
+
+
+def add_to_users_leaderboard_set(user_id: str, leaderboard_id: str) -> None:
+    # Record the leaderboard id in user's lists of leaderboards
+    try:
+        db = get_stats_tracker_db()
+        users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
+        db.sadd(users_leaderboard_set_id, leaderboard_id)
+        logging.info(f"Added leaderboard {leaderboard_id} to user {user_id} record")
+    except RedisError as err:
+        logging.exception(
+            f"An error occured while adding leaderboard {leaderboard_id} to user {user_id} record: {err}"
+        )
+
+
+def get_users_leaderboard_set(user_id: str) -> set:
+    # Get a set of all leaderboards user is in
+    users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
+    return get_stats_tracker_db().smembers(users_leaderboard_set_id)
+
+
+def delete_users_leaderboard_set(user_id: str) -> int:
+    # Delete the user's leaderboards set
+    users_leaderboard_set_id = _get_users_leaderboard_set_id(user_id)
+    return get_stats_tracker_db().delete(users_leaderboard_set_id)
+
+
+def remove_user_from_leaderboards(user_id: str):
+    """Remove user records from all leaderboards he's in.
+    Returns None in case of a database error and a list of leaderboards the user
+    was removed from otherwise."""
+    try:
+        leaderboards_ids = get_users_leaderboard_set(user_id)
+
+        if not leaderboards_ids:
+            logging.info(f"User {user_id} was not found in any leaderboard")
+            return []
+
+        pipeline = get_stats_tracker_db().pipeline()
+        removed_from_leaderboards = []
+        for leaderboard_id in leaderboards_ids:
+            removed = pipeline.zrem(leaderboard_id, user_id)
+            if removed:
+                logging.info(
+                    f"Removed user {user_id} from leaderboard {leaderboard_id}"
+                )
+                removed_from_leaderboards.append(leaderboard_id)
+            else:
+                logging.info(
+                    f"User {user_id} could not be removed from leaderboard {leaderboard_id}"
+                )
+        pipeline.execute()
+
+        delete_users_leaderboard_set(user_id)
+
+        return removed_from_leaderboards
+    except RedisError as err:
+        logging.error(
+            f"A redis database error occured while removing user from leaderboards: {err}"
+        )
+        return None

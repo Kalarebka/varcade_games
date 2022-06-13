@@ -59,6 +59,7 @@
                       </div>
 
                     </div>
+                    <div class="row error-info" v-if=errorMessage>{{errorMessage}}</div>
 
                 </div>        
 
@@ -87,7 +88,8 @@
                 openGames: [
                 ],
                 icoPlayerVS: faUserCircle,
-                icoCloseModal: faTimes
+                icoCloseModal: faTimes,
+                errorMessage: null
             }
         },
         computed: {
@@ -130,6 +132,7 @@
             },
             
             createGame: function () {
+                this.errorMessage = null;
                 this.matchmaker.createGame(
                     response => {
                         console.log(`Create game => ${response}`);
@@ -144,6 +147,8 @@
                     }, 
                     error => {
                         console.log('Game creation failed => ' + error);
+                        // // Display error info for the user
+                        this.errorMessage = error;
                     }
                 );
             },
@@ -232,10 +237,13 @@
 
     .buttons {
         height: 100px;
-        margin-top: 2em;
     }
 
-
-
+    .error-info {
+        color: #ff4848;
+        justify-content: center;
+        height: 1em;
+        margin-top: -1em;
+    }
 
 </style>
