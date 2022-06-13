@@ -759,6 +759,11 @@ const modalLayoutData = {
         padding: 60,
         originX: 0.5,
         originY: 0.5,
+        label: {
+          bitmapFontId: 'verdana64',
+          fontSize: 28,
+          fill: "#FFFFFF"
+        }
       },
       closeButton: {
         originX: 0.5,

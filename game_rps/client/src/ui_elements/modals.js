@@ -127,6 +127,16 @@ class SettingsModal extends Phaser.Scene {
     this.saveGameData = getSaveGameData()
   }
 
+  getMusicEnabledText () {
+    let musicLabelText = audioManager.musicEnabled ? "Music (ON)" : "Music (OFF)"
+    return musicLabelText
+  }
+
+  getEffectsEnabledText () {
+    let effectslabelText = audioManager.effectsEnabled ? "Sound effects (ON)" : "Sound effects (OFF)"
+    return effectslabelText
+  }
+
   create ()  {
     const headerLayout = this.layoutData.ui.header
 
@@ -164,20 +174,26 @@ class SettingsModal extends Phaser.Scene {
     const inactiveEffectsIcon = audioManager.effectsEnabled
       ? settingsLayout.icons.effectsOffIcon
       : settingsLayout.icons.effectsOnIcon
+    
 
     this.add.existing(new IconButton(this,
-      settingsLayout.x, settingsLayout.y, 'global_texture',
+      settingsLayout.x - 150, settingsLayout.y, 'global_texture',
       activeMusicIcon, inactiveMusicIcon, 0xFFFFFF, () => {
-        audioManager.toggleMusicEnabled();
-        this.saveGameData.musicEnabled = !this.saveGameData.musicEnabled;
+        audioManager.toggleMusicEnabled()
+        this.musicEnabledLabel.setText(this.getMusicEnabledText())
+        this.saveGameData.musicEnabled = !this.saveGameData.musicEnabled
       }).setOrigin(settingsLayout.originX, settingsLayout.originY))
 
     this.add.existing(new IconButton(this,
-      settingsLayout.x, settingsLayout.y + settingsLayout.padding, 'global_texture',
+      settingsLayout.x - 150, settingsLayout.y + settingsLayout.padding, 'global_texture',
       activeEffectsIcon, inactiveEffectsIcon, 0xFFFFFF, () => {
-        audioManager.toggleEffectsEnabled();
+        audioManager.toggleEffectsEnabled()
+        this.effectsEnabledLabel.setText(this.getEffectsEnabledText())
         this.saveGameData.soundEffectsEnabled = !this.saveGameData.soundEffectsEnabled;
       }).setOrigin(settingsLayout.originX, settingsLayout.originY))
+
+    this.musicEnabledLabel = this.add.text(settingsLayout.x - 100, settingsLayout.y - 15, this.getMusicEnabledText(), settingsLayout.label)
+    this.effectsEnabledLabel = this.add.text(settingsLayout.x - 100, settingsLayout.y - 15 + settingsLayout.padding, this.getEffectsEnabledText(), settingsLayout.label)
 
     const closeButtonLayout = this.layoutData.ui.closeButton
     this.closeButton = new TextButton(
