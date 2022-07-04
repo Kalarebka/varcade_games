@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: worker-manager
+Version: 0.0.1
+Summary: Worker manager for Varcade Games
+Home-page: https://github.com/Kalarebka/worker_manager
+Author: Varcade Games
+Author-email: author@example.com
+Project-URL: Bug Tracker, https://github.com/Kalarebka/worker_manager/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# worker-manager
+python package for Varcade Games
