@@ -12,7 +12,7 @@ class Game(models.Model):
         INACTIVE = "INA", "Inactive"
         COMING_SOON = "CMS", "ComingSoon"
 
-    game_id: models.CharField = models.CharField(max_length=10)
+    game_id: models.CharField = models.CharField(max_length=10, unique=True)
     name: models.CharField = models.CharField(max_length=40)
     desc: models.CharField = models.CharField(max_length=180)
     client_url: models.CharField = models.CharField(max_length=160)
